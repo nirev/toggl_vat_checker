@@ -22,7 +22,7 @@ defmodule TogglVatChecker.VatCheckerTest do
     service = make_service(fault_response("MS_UNAVAILABLE"))
     response = VatChecker.check("XXX", [service: service])
 
-    assert {:error, %Error{}} = response
+    assert {:error, %Error{short: "MS_UNAVAILABLE"}} = response
   end
 
   test "error requesting service" do

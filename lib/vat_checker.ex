@@ -3,7 +3,7 @@ defmodule TogglVatChecker.VatChecker do
   Validates a given VAT number
   """
 
-  alias TogglVatChecker.{Error, SoapRequester}
+  alias TogglVatChecker.{Error, SoapFault, SoapRequester}
 
   @type opts :: [endpoint: :live | :test]
   @type ok :: {:ok, valid? :: boolean}
@@ -47,6 +47,13 @@ defmodule TogglVatChecker.VatChecker do
 
   @spec parse_fault(String.t) :: Error.t
   defp parse_fault(body) do
-    Error.from("error", body)
+    regex = ~r/<faultstring>(?<code>[^<]+)<\/faultstring>/
+    error_code =
+      case Regex.named_captures(regex, body) do
+        nil -> "unknow error"
+        %{"code" => c} -> c
+      end
+
+    SoapFault.to_error(error_code)
   end
 end
